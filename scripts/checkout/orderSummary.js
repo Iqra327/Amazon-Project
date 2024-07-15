@@ -1,9 +1,11 @@
-import {cart, removeFromCart, updateDeliveryOption} from '../../data/cart.js';
+import {cart, removeFromCart, updateDeliveryOption, updateQuantity} from '../../data/cart.js';
 import {products, getProduct } from '../../data/products.js';
 import { formatCurrency } from '../utils/money.js';
 import dayjs from 'https://unpkg.com/dayjs@1.11.10/esm/index.js';
-import { deliveryOptions, getDeliveryOption } from '../../data/deliveryOptions.js';
+import { deliveryOptions, getDeliveryOption, calculateDeliveryDate } from '../../data/deliveryOptions.js';
 import { renderPaymentSummary } from './paymentSummary.js';
+import { renderCheckoutHeader } from './checkoutHeader.js';
+
 
 
 export function renderOrderSummary(){
@@ -18,14 +20,7 @@ export function renderOrderSummary(){
 
     const deliveryOption = getDeliveryOption(deliveryOptionId);
 
-    const today = dayjs();
-    const deliveryDate = today.add(
-      deliveryOption.deliveryDays, 
-      'days'
-    );
-    const dateString = deliveryDate.format(
-      'dddd, MMMM D'
-    );
+    const dateString = calculateDeliveryDate(deliveryOption);
 
       cartSummaryHTML += `
       <div class="cart-item-container js-cart-item-container-${matchingProduct.id}">
@@ -46,10 +41,16 @@ export function renderOrderSummary(){
             </div>
             <div class="product-quantity">
               <span>
-                Quantity: <span class="quantity-label">${cartItem.quantity}</span>
+                Quantity: <span class="quantity-label js-quantity-label-${matchingProduct.id}">${cartItem.quantity}</span>
               </span>
-              <span class="update-quantity-link link-primary">
+              <span class="update-quantity-link link-primary js-update-link"
+              data-product-id="${matchingProduct.id}">
                 Update
+              </span>
+              <input class="quantity-input js-quantity-input-${matchingProduct.id}">
+              <span class="save-quantity-link link-primary js-save-link"
+                data-product-id="${matchingProduct.id}">
+                Save
               </span>
               <span class="delete-quantity-link link-primary js-delete-link" data-product-id="${matchingProduct.id}">
                 Delete
@@ -72,14 +73,8 @@ export function renderOrderSummary(){
     let html = '';
 
     deliveryOptions.forEach((deliveryOption) => {
-        const today = dayjs();
-        const deliveryDate = today.add(
-          deliveryOption.deliveryDays, 
-          'days'
-        );
-        const dateString = deliveryDate.format(
-          'dddd, MMMM D'
-        );
+        
+        const dateString = calculateDeliveryDate(deliveryOption);
 
         const priceString = deliveryOption.priceCents === 0 
         ? 'FREE'
@@ -118,9 +113,8 @@ export function renderOrderSummary(){
         const productId = link.dataset.productId;
         removeFromCart(productId);
 
-        const container = document.querySelector(`.js-cart-item-container-${productId}`);
-        container.remove();
-
+        renderCheckoutHeader();
+        renderOrderSummary();
         renderPaymentSummary();
       });
     });
@@ -131,6 +125,52 @@ export function renderOrderSummary(){
         updateDeliveryOption(productId, deliveryOptionId);
         renderOrderSummary();
         renderPaymentSummary();
+      });
+    });
+
+    document.querySelectorAll('.js-update-link')
+    .forEach((link) => {
+      link.addEventListener('click', () => {
+        const productId = link.dataset.productId;
+
+        const container = document.querySelector(
+          `.js-cart-item-container-${productId}`
+        );
+        container.classList.add('is-editing-quantity');
+      });
+    });
+
+  document.querySelectorAll('.js-save-link')
+    .forEach((link) => {
+      link.addEventListener('click', () => {
+        const productId = link.dataset.productId;
+
+        const container = document.querySelector(
+          `.js-cart-item-container-${productId}`
+        );
+        container.classList.remove('is-editing-quantity');
+
+        const quantityInput = document.querySelector(
+          `.js-quantity-input-${productId}`
+        );
+        const newQuantity = Number(quantityInput.value);
+        updateQuantity(productId, newQuantity);
+
+        renderCheckoutHeader();
+        renderOrderSummary();
+        renderPaymentSummary();
+
+        // We can delete the code below (from the original solution)
+        // because instead of using the DOM to update the page directly
+        // we can use MVC and re-render everything. This will make sure
+        // the page always matches the data.
+
+        // const quantityLabel = document.querySelector(
+        //   `.js-quantity-label-${productId}`
+        // );
+        // quantityLabel.innerHTML = newQuantity;
+
+        // updateCartQuantity();
       });
     });
 }
