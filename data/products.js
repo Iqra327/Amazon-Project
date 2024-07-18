@@ -172,7 +172,7 @@ export const products = [
       "appliances"
     ],
     type: "appliance",
-    intstrunctionsLink: "images/appliance-instructions.png",
+    instructionsLink: "images/appliance-instructions.png",
     warrantyLink: "images/appliance-warranty.png"
 
   },
@@ -361,7 +361,7 @@ export const products = [
       "kitchen"
     ],
     type: "appliance",
-    intstrunctionsLink: "images/appliance-instructions.png",
+    instructionsLink: "images/appliance-instructions.png",
     warrantyLink: "images/appliance-warranty.png"
   },
   {
@@ -669,7 +669,7 @@ export const products = [
       "appliances"
     ],
     type: "appliance",
-    intstrunctionsLink: "images/appliance-instructions.png",
+    instructionsLink: "images/appliance-instructions.png",
     warrantyLink: "images/appliance-warranty.png"
   },
   {
@@ -732,7 +732,7 @@ export const products = [
       "appliances"
     ],
     type: "appliance",
-    intstrunctionsLink: "images/appliance-instructions.png",
+    instructionsLink: "images/appliance-instructions.png",
     warrantyLink: "images/appliance-warranty.png"
   },
   {
