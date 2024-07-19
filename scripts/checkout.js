@@ -7,23 +7,47 @@ import { loadCart } from "../data/cart.js";
 // import '../data/car.js';
 // import '../data/backend-practice.js';
 
-
-new Promise((resolve) => {
-  loadProducts(() => {
-    resolve();
-  });
-}).then(() => {
-  return new Promise((resolve) => {
+Promise.all([
+  new Promise((resolve) => {
+    loadProducts(() => {
+      resolve('value1');
+    });
+  }),
+  new Promise((resolve) => {
     loadCart(() => {
       resolve();
     });
-  });
-}).then(() => {
+  })
+
+]).then((values) => {
+  console.log(values);
   renderCheckoutHeader();
   renderOrderSummary();
   renderPaymentSummary();
 });
 
+
+/*
+new Promise((resolve) => {
+  loadProducts(() => {
+    resolve('value1');
+  });
+
+}).then((value) => {
+  console.log(value);
+
+  return new Promise((resolve) => {
+    loadCart(() => {
+      resolve();
+    });
+  });
+
+}).then(() => {
+  renderCheckoutHeader();
+  renderOrderSummary();
+  renderPaymentSummary();
+});
+*/
 
 /*
 loadProducts(() => {
