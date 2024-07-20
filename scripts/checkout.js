@@ -8,7 +8,6 @@ import { loadCart } from "../data/cart.js";
 // import '../data/backend-practice.js';
 
 async function loadPage(){
-  
   await loadProductsFetch();
 
   await new Promise((resolve) => {
@@ -22,6 +21,7 @@ async function loadPage(){
   renderPaymentSummary();
 
 }
+loadPage();
 
 /*
 Promise.all([
