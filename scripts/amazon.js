@@ -9,7 +9,26 @@ function renderProductsGrid () {
 
   let productsHTML = '';
 
-  products.forEach((product) => {
+  const url = new URL(window.location.href);
+  const search = url.searchParams.get('search');
+
+  let filteredProducts = products;
+  
+  if(search){
+    filteredProducts = products.filter((product) => {
+      let matchingKeyword = false;
+
+      product.keywords.forEach((keyword) => {
+        if(keyword.toLowerCase().includes(search.toLocaleLowerCase())) {
+          matchingKeyword =true;
+        }
+      });
+      return matchingKeyword || product.name.toLowerCase().includes(search.toLowerCase());
+    });
+  }
+
+filteredProducts.forEach((product) => {
+
     productsHTML += `
       <div class="product-container">
         <div class="product-image-container">
@@ -34,7 +53,7 @@ function renderProductsGrid () {
         </div>
 
         <div class="product-quantity-container">
-          <select>
+          <select class="js-quantity-selector-${product.id}">
             <option selected value="1">1</option>
             <option value="2">2</option>
             <option value="3">3</option>
@@ -52,7 +71,7 @@ function renderProductsGrid () {
 
         <div class="product-spacer"></div>
 
-        <div class="added-to-cart">
+        <div class="added-to-cart js-add-to-cart-${product.id}">
           <img src="images/icons/checkmark.png">
           Added
         </div>
@@ -76,11 +95,45 @@ function renderProductsGrid () {
     document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
   }
 
+  updateCartQuantity();
+
+  let addedMessageTimeouts = {};
+
   document.querySelectorAll('.js-add-to-cart').forEach((button) => {
     button.addEventListener('click', () => {
-      const productId = button.dataset.productId;
-      addToCart(productId);
+      const { productId }= button.dataset;
+      const querySelector = document.querySelector(`.js-quantity-selector-${productId}`);
+      const quantity = Number(querySelector.value);
+
+      const addedMessage = document.querySelector(`.js-add-to-cart-${productId}`);
+      addedMessage.classList.add("added-to-cart-op");
+    
+      const previousTimeoutId = addedMessageTimeouts[productId];
+
+      if(previousTimeoutId){
+        clearTimeout(previousTimeoutId);
+      }
+      
+      const timeoutId = setTimeout(()=> {
+        addedMessage.classList.remove("added-to-cart-op");
+      }, 2000);
+
+      addToCart(productId, quantity);
       updateCartQuantity();
+
     });
   });
-};
+
+
+  document.querySelector('.js-search-button').addEventListener('click', () => {
+    const search = document.querySelector('.js-search-bar').value;
+    window.location.href = `amazon.html?search=${search}`;
+  });
+
+  document.querySelector('.js-search-bar').addEventListener('keyword', (event) => {
+    if(event.key === 'Enter') {
+      const searchTerm = document.querySelector('.js-search-bar').value;
+      window.location.href = `amazon.html?search=${searchTerm}`
+    }
+  });
+}
